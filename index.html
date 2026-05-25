@@ -31,6 +31,7 @@
   .toggle button { margin-left: auto; padding: 7px 18px; font-size: 13px; font-weight: 700; cursor: pointer; border-radius: 20px; border: none; background: #ccc; color: #fff; }
   .toggle button.on { background: #0f3460; }
   .note { font-size: 12px; color: #999; margin-top: 12px; line-height: 1.6; }
+  .infobox { background: #fff8e6; border: 1px solid #f0d98c; border-radius: 10px; padding: 12px 14px; font-size: 12px; color: #8a6d1a; line-height: 1.65; margin: 4px 0 16px; }
   .result { background: linear-gradient(135deg, #0f3460, #16537e); border-radius: 16px; padding: 28px; color: #fff; }
   .result .cap { font-size: 14px; opacity: .8; margin-bottom: 4px; }
   .result .big-amt { font-size: 36px; font-weight: 800; margin-bottom: 20px; }
@@ -61,24 +62,26 @@
   </div>
 
   <div class="panel">
-    <p class="unit-note">※ 모든 금액 입력은 <b>천원 단위</b></p>
+    <p class="unit-note">※ 모든 금액 입력은 <b>원 단위</b></p>
 
     <!-- 상속세 패널 -->
     <div id="panel-inherit">
       <div class="sectitle">① 상속재산</div>
-      <div class="field"><div class="label"><span>본래의 상속재산</span></div><input class="big" id="iAssets" placeholder="예: 1,500,000 (15억)" oninput="fmt(this);calc()"></div>
+      <div class="field"><div class="label"><span>본래의 상속재산</span></div><input class="big" id="iAssets" placeholder="예: 1,500,000,000 (15억)" oninput="fmt(this);calc()"></div>
       <div class="field"><div class="label"><span>간주상속재산 (보험금·퇴직금 등)</span></div><input id="iInsurance" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
       <div class="field"><div class="label"><span>추정상속재산</span><span class="hint">용도불분명 처분·인출액</span></div><input id="iPresumed" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
 
       <div class="sectitle">② 차감 / 가산</div>
       <div class="field"><div class="label"><span>채무·공과금</span></div><input id="iDebt" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
       <div class="field"><div class="label"><span>장례비용</span><span class="hint">500만~1,000만 한도 자동적용</span></div><input id="iFuneral" placeholder="미입력시 500만 기본" oninput="fmt(this);calc()"></div>
-      <div class="field"><div class="label"><span>사전증여재산 가산</span><span class="hint">상속인 10년 / 비상속인 5년</span></div><input id="iPriorGift" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
+      <div class="field"><div class="label"><span>사전증여재산 가산 (상속인분)</span><span class="hint">상속인 10년 / 비상속인 5년</span></div><input id="iPriorGift" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
+      <div class="field"><div class="label"><span>└ 사전증여 과세표준</span><span class="hint">종합한도·배우자한도 차감용</span></div><input id="iPriorGiftBase" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
       <div class="field"><div class="label"><span>└ 기납부 증여세액</span><span class="hint">증여세액공제로 차감</span></div><input id="iPriorGiftTax" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
+      <div class="field"><div class="label"><span>└ 배우자 사전증여 과세표준 (E)</span><span class="hint">배우자공제 한도 차감</span></div><input id="iSpousePriorBase" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
 
       <div class="sectitle">③ 상속공제</div>
       <div class="toggle"><span class="t">배우자 있음</span><button class="on" id="tg-spouse" onclick="toggleSpouse()">예</button></div>
-      <div class="field" id="spouseField"><div class="label"><span>배우자 실제 상속분</span><span class="hint">실제·법정한도 중 작은 값 적용</span></div><input id="spouseInherit" placeholder="예: 500,000 (5억)" oninput="fmt(this);calc()"></div>
+      <div class="field" id="spouseField"><div class="label"><span>배우자 실제 상속분</span><span class="hint">실제·법정한도 중 작은 값 적용</span></div><input id="spouseInherit" placeholder="예: 500,000,000 (5억)" oninput="fmt(this);calc()"></div>
       <div class="grid2f">
         <div class="field"><div class="label"><span>자녀 수</span></div><input id="childCount" placeholder="0" oninput="onlyNum(this);calc()"></div>
         <div class="field"><div class="label"><span>연로자 수 (65세+)</span></div><input id="elderCount" placeholder="0" oninput="onlyNum(this);calc()"></div>
@@ -87,13 +90,24 @@
       </div>
       <div class="field"><div class="label"><span>순금융재산</span><span class="hint">20% 공제 (최대 2억)</span></div><input id="iFinancial" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
 
+      <div class="sectitle">④ 기타 옵션</div>
       <div class="toggle"><span class="t">세대생략 상속 (손자녀 등)</span><span class="h">할증 30%</span><button id="tg-iskip" onclick="toggleISkip()">아니오</button></div>
-      <p class="note">※ 일괄공제 = MAX(기초 2억 + 인적공제, 5억). 배우자 단독상속 시 일괄공제 배제(인적공제만 적용).</p>
+      <div class="field"><div class="label"><span>비상속인 유증·사인증여 (①)</span><span class="hint">종합한도 차감</span></div><input id="iBequest" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
+      <div class="field"><div class="label"><span>상속포기로 후순위가 받은 재산 (②)</span><span class="hint">종합한도 차감</span></div><input id="iRenounce" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
+
+      <div class="toggle"><span class="t">가업승계 주식 등 과세특례 적용분 보유</span><button id="tg-bizskip" onclick="toggleBizSkip()">아니오</button></div>
+      <div class="field hide" id="bizField"><div class="label"><span>└ 가업승계 특례 사전증여액</span><span class="hint">위 사전증여 가산액 중 특례분</span></div><input id="iBizGift" placeholder="없으면 0" oninput="fmt(this);calc()"></div>
+      <div class="infobox hide" id="bizInfo">
+        ⚠️ <b>가업승계 주식 등 과세특례 안내</b><br>
+        조특법상 창업자금·가업승계 주식 증여세 특례 적용 사전증여재산은 <b>전체 상속공제 종합한도 계산 시 차감하는 사전증여재산에서 제외</b>됩니다. 따라서 해당 특례분은 상속공제 한도를 축소시키지 않습니다. 단, 특례 적용·사후관리 요건(가업영위기간·고용유지 등) 충족 여부는 별도 검토가 필요합니다.
+      </div>
+
+      <p class="note">※ 일괄공제 = MAX(기초 2억 + 인적공제, 5억). 배우자 단독상속 시 일괄공제 배제(인적공제만 적용).<br>※ 상속공제 종합한도: 과세가액에서 ①·②·③(사전증여 과세표준, 과세가액 5억 초과 시)을 차감한 금액을 한도로 함.</p>
     </div>
 
     <!-- 증여세 패널 -->
     <div id="panel-gift" class="hide">
-      <div class="field"><div class="label"><span>증여재산 가액</span></div><input class="big" id="gAssets" placeholder="예: 1,000,000 (10억)" oninput="fmt(this);calc()"></div>
+      <div class="field"><div class="label"><span>증여재산 가액</span></div><input class="big" id="gAssets" placeholder="예: 1,000,000,000 (10억)" oninput="fmt(this);calc()"></div>
       <div class="label"><span>증여자와의 관계 (증여재산공제)</span></div>
       <div class="grid2" id="giftRelGroup">
         <button class="selbtn" data-rel="spouse" onclick="setRel('spouse')">배우자 (6억)</button>
@@ -115,7 +129,7 @@
   </div>
 
   <p class="disclaimer">
-    상담용 간이 시뮬레이션입니다. 가업상속공제·동거주택공제 등은 미반영.<br>
+    상담용 간이 시뮬레이션입니다. 동거주택공제 등은 미반영. 가업상속공제는 미반영(가업승계 증여특례의 종합한도 차감 제외만 반영).<br>
     실제 세액은 재산평가·공제요건에 따라 달라지며 정확한 신고는 전문가 검토가 필요합니다.
   </p>
 </div>
@@ -124,7 +138,7 @@
   var mode = "inherit";
   var rel = "adultLineal";
   var hasSpouse = true;
-  var iSkip = false, gSkip = false;
+  var iSkip = false, gSkip = false, bizSkip = false;
   var giftDed = { spouse: 600000000, adultLineal: 50000000, minorLineal: 20000000, other: 10000000 };
   var brackets = [
     { limit: 100000000, rate: 0.1, ded: 0 },
@@ -153,7 +167,8 @@
     return (s.trim() || "0") + "원";
   }
   function num(n) { return Math.round(n).toLocaleString() + "원"; }
-  function val(id) { var e = document.getElementById(id); return (parseFloat((e.value || "").replace(/,/g, "")) || 0) * 1000; }
+  // 원 단위 입력: 입력값 그대로 사용
+  function val(id) { var e = document.getElementById(id); return parseFloat((e.value || "").replace(/,/g, "")) || 0; }
   function intval(id) { return parseInt(document.getElementById(id).value) || 0; }
   function fmt(el) { var c = el.value.replace(/[^0-9]/g, ""); el.value = c ? parseInt(c).toLocaleString() : ""; }
   function onlyNum(el) { el.value = el.value.replace(/[^0-9]/g, ""); }
@@ -191,6 +206,14 @@
     b.className = gSkip ? "on" : ""; b.textContent = gSkip ? "예" : "아니오";
     calc();
   }
+  function toggleBizSkip() {
+    bizSkip = !bizSkip;
+    var b = document.getElementById("tg-bizskip");
+    b.className = bizSkip ? "on" : ""; b.textContent = bizSkip ? "예" : "아니오";
+    document.getElementById("bizField").className = "field" + (bizSkip ? "" : " hide");
+    document.getElementById("bizInfo").className = "infobox" + (bizSkip ? "" : " hide");
+    calc();
+  }
 
   function row(l, v, cls) { return '<div class="row ' + (cls || "") + '"><span class="l">' + l + '</span><span class="v">' + v + '</span></div>'; }
 
@@ -221,7 +244,9 @@
       html += row("신고세액공제 (3%)", "− " + num(credit));
     } else {
       var base0 = val("iAssets"), ins = val("iInsurance"), presumed = val("iPresumed");
-      var debt = val("iDebt"), priorGift = val("iPriorGift"), priorGiftTax = val("iPriorGiftTax"), financial = val("iFinancial");
+      var debt = val("iDebt"), priorGift = val("iPriorGift"), priorGiftBase = val("iPriorGiftBase"),
+          priorGiftTax = val("iPriorGiftTax"), spousePriorBase = val("iSpousePriorBase"), financial = val("iFinancial");
+      var bequest = val("iBequest"), renounce = val("iRenounce"), bizGift = bizSkip ? val("iBizGift") : 0;
       var funeralInput = val("iFuneral");
       var funeral = funeralInput === 0 ? 5000000 : Math.min(Math.max(funeralInput, 5000000), 10000000);
 
@@ -234,19 +259,33 @@
       var spouseOnly = hasSpouse && children === 0;
       var lumpSum = spouseOnly ? personalSum : Math.max(personalSum, 500000000);
 
-      var spouseDed = 0, spouseLimit = 0, spouseActual = 0;
+      // --- 배우자공제 한도: [(A - B + C) × D] - E ---
+      // A = 총상속재산 - (공과금·채무)  [장례비 미차감], B = 수유자 유증, C = 상속인 사전증여 가산, D = 배우자 법정비율, E = 배우자 사전증여 과세표준
+      var spouseDed = 0, spouseLimitFormula = 0, spouseActual = 0;
       if (hasSpouse) {
         spouseActual = val("spouseInherit");
         var ratio = 1.5 / (1.5 + children);
-        spouseLimit = Math.min(taxableValue * ratio, 3000000000);
-        spouseDed = Math.min(spouseActual, spouseLimit);
-        spouseDed = Math.max(spouseDed, 500000000);
+        var Aval = Math.max(0, gross - debt); // 채무·공과금만 차감 (장례비 제외)
+        var formula = (Aval - bequest + priorGift) * ratio - spousePriorBase;
+        spouseLimitFormula = Math.min(Math.max(formula, 0), 3000000000);
+        spouseDed = Math.min(spouseActual, spouseLimitFormula);
+        spouseDed = Math.max(spouseDed, 500000000); // 최소 5억 보장
       }
 
       var financialDed = 0;
       if (financial > 0) financialDed = financial <= 20000000 ? financial : Math.min(financial * 0.2, 200000000);
 
-      var totalDed = lumpSum + spouseDed + financialDed;
+      var totalDedRaw = lumpSum + spouseDed + financialDed;
+
+      // --- 상속공제 종합한도 = 과세가액 - (① + ② + ③) ---
+      // ③ 사전증여 과세표준 (과세가액 5억 초과 시만), 단 가업승계 특례분 제외
+      var item3 = 0;
+      if (taxableValue > 500000000) {
+        item3 = Math.max(0, priorGiftBase - bizGift); // 가업승계 특례분 차감 제외
+      }
+      var comprehensiveLimit = Math.max(0, taxableValue - bequest - renounce - item3);
+      var totalDed = Math.min(totalDedRaw, comprehensiveLimit);
+
       taxBase = Math.max(0, taxableValue - totalDed);
       var r2 = calcTax(taxBase); rate = r2.rate;
       var surcharge2 = iSkip ? r2.tax * 0.3 : 0;
@@ -262,8 +301,13 @@
       html += row("과세가액", num(taxableValue), "bold");
       html += row(spouseOnly ? "인적공제 (단독상속)" : "일괄공제", "− " + num(lumpSum));
       if (hasSpouse) html += row("배우자공제", "− " + num(spouseDed));
-      if (hasSpouse && spouseActual > 0) html += '<div class="subnote">└ MIN(실제 ' + won(spouseActual) + ', 법정한도 ' + won(spouseLimit) + '), 최소 5억 보장</div>';
+      if (hasSpouse && spouseActual > 0) html += '<div class="subnote">└ MIN(실제 ' + won(spouseActual) + ', 산식한도 ' + won(spouseLimitFormula) + '), 최소 5억 보장</div>';
       if (financialDed > 0) html += row("금융재산공제", "− " + num(financialDed));
+      if (totalDed < totalDedRaw) {
+        html += row("공제 합계(한도 전)", num(totalDedRaw));
+        html += '<div class="subnote">└ 종합한도 ' + won(comprehensiveLimit) + ' 적용으로 공제 축소</div>';
+        html += row("적용 상속공제(한도)", "− " + num(totalDed), "bold");
+      }
       html += row("과세표준", num(taxBase), "bold");
       html += row("적용 최고세율", (rate * 100) + "%");
       html += row("산출세액", num(r2.tax));
